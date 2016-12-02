@@ -20,6 +20,22 @@ $__ = function (selector) {
 
 $.fn = $__.prototype;
 
+
+$.trim = function (string, exp) {
+    if (!exp)
+        exp = '\\s';
+    return string.replace(new RegExp('^(' + exp + ')+|(' + exp + ')+$', 'g'), '');
+};
+
+$.fn.data = function (key, value) {
+    if (arguments.length == 1) {
+        return this.el[0].dataset[key];
+    } else {
+        this.el[0].dataset[key] = value;
+        return this;
+    }
+};
+
 $.fn.eq = function (index) {
     return $(this.el[index]);
 };

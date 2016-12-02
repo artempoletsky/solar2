@@ -47,22 +47,64 @@ $(function () {
         }
     });
 
+    function getCellByPosition(x, y) {
+        return $table.children().eq(y).children().eq(x).children().eq(0);
+    };
+
     function setFocus(x, y) {
         var $cell;
         if (y) {
-            $cell = $table.children().eq(y).children().eq(x).children().eq(0);
+            $cell = getCellByPosition(x, y);
         } else {
             $cell = $(x);
         }
         $('.table_cell.focused').removeClass('focused');
         $cell.addClass('focused');
-        console.log($cell);
-    }
+    };
+
+    var variableExp = /([A-Z]+)(\d+)/ig;
+
+    //name = AA11 etc
+    function getCellByName(name) {
+        name = name.toUpperCase();
+        variableExp.lastIndex = 0;
+        var res = variableExp.exec(name);
+
+        var x = fromLetters(res[1]) - 1;
+        var y = res[2] - 1;
+
+        return getCellByPosition(x, y);
+    };
+
+
+
+    function getCellValue($cell) {
+        var formula = $cell.data('formula');
+
+        if (!formula) {
+            return 0;
+        }
+
+        variableExp.lastIndex = 0;
+        formula = formula.replace(variableExp, function (cell) {
+            return getCellValue(getCellByName(cell));
+        });
+
+        formula = $.trim(formula, '=');
+
+
+        return eval(formula);
+    };
+
 
     function stopRecordingFormula() {
         var $editable = $('.editable')
             .removeAttr('contenteditable')
             .removeClass('editable');
+        var formula = $editable.html();
+        $editable.data('formula', formula);
+
+        $editable.html(getCellValue($editable));
         Selection.clear();
         recordingFormula = false;
     }
