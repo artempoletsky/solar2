@@ -42,12 +42,17 @@ var App = {
 
             var $target = $(e.target);
             $('.table_cell.focused').removeClass('focused');
+            var f = $target.data('formula');
+            if (f) {
+                $target.html(f);
+            }
             $target
                 .attr('contenteditable', 'true')
                 .addClass('editable')
                 .focus();
 
-            App.recordingPosition = App.getPosition($target);
+
+            App.recordingPosition = App.getCellPosition($target);
             App.recordingFormula = true;
         }
     },
@@ -81,7 +86,7 @@ var App = {
         if (App.recordingFormula && e.keyCode == 13) {
             e.preventDefault();
 
-            var pos = App.getPosition($('.editable'));
+            var pos = App.getCellPosition($('.editable'));
             App.stopRecordingFormula();
             App.setFocus(pos.x, pos.y + 1);
         }
@@ -90,10 +95,16 @@ var App = {
         var $editable = $('.editable')
             .removeAttr('contenteditable')
             .removeClass('editable');
-        var formula = $editable.html();
+        var formula = $editable.text();
+
+
+        $('.formula_focused').removeClass('formula_focused');
+
         $editable.data('formula', formula);
 
-        $editable.html(App.getCellValue($editable));
+        App.setCellFormula($editable, formula);
+
+
         Selection.clear();
         App.recordingFormula = false;
     },
@@ -104,8 +115,8 @@ var App = {
         } else {
             $cell = $(x);
         }
-        $('.table_cell.focused').removeClass('focused');
-        $cell.addClass('focused');
+
+        $cell.switchClassTo('focused');
     },
     getCellByPosition: function (x, y) {
         return this.$table.children().eq(y).children().eq(x).children().eq(0);
@@ -123,43 +134,94 @@ var App = {
 
         return App.getCellByPosition(x, y);
     },
-    getCellValue: function ($cell) {
-        var formula = $cell.data('formula');
 
-        if (!formula) {
-            return 0;
+    getCellName: function ($cell) {
+        var name = $cell.data('name');
+        if (!name) {
+            var pos = App.getCellPosition($cell);
+            name = App.toLetters(pos.x + 1) + (pos.y + 1);
+            $cell.data('name', name);
         }
+        return name;
+    },
 
+    updateCells: function (reverseDeps) {
+
+        for (var name in reverseDeps) {
+            var $cell = App.getCellByName(name);
+
+            var result = App.compileFormula($cell.data('formula'));
+
+            $cell
+                .data('value', result)
+                .html(result);
+
+            App.updateCells($cell.data('reverseDeps'));
+        }
+    },
+
+    compileFormula: function (formula, deps, name) {
         this.variableExp.lastIndex = 0;
+
+        if (!formula)
+            return 0;
+
         formula = formula.replace(this.variableExp, function (cell) {
-            return App.getCellValue(this.getCellByName(cell));
+            var $cell = App.getCellByName(cell);
+
+            if (deps) {
+                //write deps
+                deps[cell] = true;
+                var rd = $cell.data('reverseDeps') || {};
+                rd[name] = true;
+                $cell.data('reverseDeps', rd);
+            }
+
+            return App.getCellValue($cell);
         });
+
 
         formula = $.trim(formula, '=');
 
+        var result;
 
-        return eval(formula);
+        try {
+            result = eval(formula);
+        } catch (e) {
+            debugger;
+        }
+
+        return result;
+    },
+
+    setCellFormula: function ($cell, formula) {
+
+
+        var deps = $cell.data('deps') || {};
+
+        var reverseDeps = $cell.data('reverseDeps');
+
+        var name = App.getCellName($cell);
+
+
+        //fixme: это плохо
+        for (var dep in deps) {
+            delete App.getCellByName(dep).data(reverseDeps)[name];
+        }
+
+        var result = App.compileFormula(formula, deps, name);
+
+        $cell.data('value', result).html(result);
+
+        App.updateCells(reverseDeps);
+
     },
 
     getCellValue: function ($cell) {
-        var formula = $cell.data('formula');
-
-        if (!formula) {
-            return 0;
-        }
-
-        this.variableExp.lastIndex = 0;
-        formula = formula.replace(this.variableExp, function (cell) {
-            return App.getCellValue(App.getCellByName(cell));
-        });
-
-        formula = $.trim(formula, '=');
-
-
-        return eval(formula);
+        return $cell.data('value') || 0;
     },
 
-    getPosition: function ($cell) {
+    getCellPosition: function ($cell) {
         var $parent = $cell.parent();
         return {
             x: $parent.index(),
@@ -175,11 +237,12 @@ var App = {
             if (App.recordingFormula) {
 
                 var $editable = $('.editable');
-                var formula = $editable.html();
+                var formula = $editable.text();
                 if (formula.startsWith('=')) {
-                    var pos = App.getPosition($target);
-
+                    var pos = App.getCellPosition($target);
                     Selection.insertTextAtCursor(App.toLetters(pos.x + 1) + (pos.y + 1));
+
+                    $target.switchClassTo('formula_focused');
                 } else {
                     App.stopRecordingFormula();
                 }

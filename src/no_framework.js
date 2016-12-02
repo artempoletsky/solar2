@@ -26,12 +26,27 @@ $.trim = function (string, exp) {
         exp = '\\s';
     return string.replace(new RegExp('^(' + exp + ')+|(' + exp + ')+$', 'g'), '');
 };
+(function () {
+    var uids = {};
+
+    $.uid = function (prefix) {
+        if (!uids[prefix]) {
+            uids[prefix] = 0;
+        }
+        return uids[prefix]++;
+    }
+
+}());
+
 
 $.fn.data = function (key, value) {
+    var el = this.el[0];
+    var data = el.customData || {};
     if (arguments.length == 1) {
-        return this.el[0].dataset[key];
+        return data[key];
     } else {
-        this.el[0].dataset[key] = value;
+        data[key] = value;
+        el.customData = data;
         return this;
     }
 };
@@ -54,14 +69,20 @@ $.fn.html = function () {
         this.el.forEach(el => el.innerHTML = arguments[0]);
         return this;
     } else {
-        try {
-            return this.el[0].innerHTML;
-        } catch (e) {
-            debugger;
-        }
-
+        return this.el[0].innerHTML;
     }
 };
+
+
+$.fn.text = function () {
+    if (arguments.length) {
+        this.el.forEach(el => el.innerText = arguments[0]);
+        return this;
+    } else {
+        return this.el[0].innerText;
+    }
+};
+
 
 $.fn.focus = function () {
     this.el[0].focus();
@@ -106,6 +127,11 @@ $.fn.on = function (event_name, callback) {
 
     this.el[0].addEventListener(event_name, callback);
     return this;
+};
+
+$.fn.switchClassTo = function (className) {
+    $('.' + className).removeClass(className);
+    return this.addClass(className);
 };
 
 $.toArray = function (nodeList) {
