@@ -18,6 +18,19 @@ $__ = function (selector) {
 
 $.fn = $__.prototype;
 
+$.make=function(tagName){
+    return $(document.createElement(tagName));
+};
+
+$.fn.empty = function () {
+    this.el.forEach(function (el) {
+        while (el.childNodes.length) {
+            el.removeChild(el.childNodes[0]);
+        }
+    });
+    return this;
+};
+
 $.fn.on = function (event_name, callback) {
 
     this.el[0].addEventListener(event_name, callback);
@@ -25,7 +38,7 @@ $.fn.on = function (event_name, callback) {
 };
 
 $.toArray = function (nodeList) {
-    if(nodeList instanceof NodeList|| nodeList instanceof Array){
+    if (nodeList instanceof NodeList || nodeList instanceof Array) {
         return [].slice.call(nodeList);
     }
     return [nodeList];
@@ -54,7 +67,7 @@ $.fn.parent = function (className) {
 
     if (found) {
         return $(el);
-    }else {
+    } else {
         return $();
     }
 };
