@@ -1,13 +1,28 @@
-.table_cell
-{
+.table_cell {
     min-height: 20px;
+    cursor: default;
 }
 
-.main_table{
+.main_table {
     border-collapse: collapse;
 }
-.main_table td{
+
+.main_table td {
     padding: 0;
     border: 1px solid #000;
     min-width: 100px;
+}
+
+.table_cell.focused {
+    border: 3px solid #000;
+    margin: -3px;
+}
+
+.table_cell.formula_focused {
+    border: 1px solid #a00006;
+    margin: -1px;
+}
+
+.table_cell.editable {
+    cursor: text;
 }
