@@ -9,18 +9,22 @@
 
 .main_table td {
     padding: 0;
-    border: 1px solid #000;
+    border: 1px solid #c0c0c0;
     min-width: 100px;
 }
 
 .table_cell.focused {
     border: 3px solid #000;
     margin: -3px;
+    position: relative;
+    z-index: 1;
 }
 
 .table_cell.formula_focused {
     border: 2px solid #a00006;
     margin: -2px;
+    position: relative;
+    z-index: 1;
 }
 
 .table_cell.editable {
@@ -47,4 +51,70 @@
     top: 0;
     opacity: 0;
     height: 100px;
+}
+.table_wrapper {
+    width: 100%;
+    left: 0;
+    top: 60px;
+    bottom: 0;
+    position: absolute;
+    overflow: hidden;
+}
+.table_view_port {
+    overflow: auto;
+    right: 0;
+    left: 32px;
+    top: 19px;
+    bottom: 0;
+    position: absolute;
+    padding: 2px;
+}
+
+.load_save_menu {
+    position: absolute;
+    z-index: 1;
+    top: 13px;
+    left: 35px;
+    font-family: sans-serif;
+}
+body, html{
+    margin: 0;
+    padding: 0;
+}
+
+.thx div, .thy div{
+    text-align: center;
+    border: 1px solid #696969;
+    height: 20px;
+    background: linear-gradient(to bottom, #f6f6f6 0%, #ebebeb 50%,#f0f0f0 100%);
+    line-height: 20px;
+}
+.thx div{
+    display: inline-block;
+    width: 100px;
+    border-right: 0;
+}
+.thx {
+    white-space: nowrap;
+    padding-left: 34px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+}
+
+.thy {
+    width: 35px;
+    position: absolute;
+    left: 0;
+    top: 21px;
+    bottom: 0;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.thy div {
+    border-bottom: 0;
+    display: block;
+    width: auto;
 }

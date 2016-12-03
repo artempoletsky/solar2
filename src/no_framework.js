@@ -20,6 +20,40 @@ $__ = function (selector) {
 
 $.fn = $__.prototype;
 
+$.fn.scroll = function (callback) {
+    var ticking = false;
+
+    var el = this.el[0];
+    el.addEventListener('scroll', function (e) {
+        if (!ticking) {
+            window.requestAnimationFrame(function () {
+                callback(el.scrollLeft, el.scrollTop);
+                ticking = false;
+            });
+        }
+        ticking = true;
+    });
+    return this;
+};
+
+$.debounce = function (callback, time, context) {
+    var timeout;
+    return function () {
+        var args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(function () {
+            callback.apply(context, args);
+        }, time);
+    };
+};
+
+$.fn.width = function(){
+    return this.el[0].clientWidth;
+};
+
+$.fn.height = function(){
+    return this.el[0].clientHeight;
+};
 
 $.trim = function (string, exp) {
     if (!exp)

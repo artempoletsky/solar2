@@ -6,14 +6,20 @@
     <script type="text/javascript" src="src/no_framework.js"></script>
     <script type="text/javascript" src="src/cell.js"></script>
     <script type="text/javascript" src="src/index.js"></script>
+
 </head>
 <body>
-<div>
-    <div class="load_save_menu">
-        <span class="button load_button">Загрузить <input type="file" class="file_hidden"/></span>
-        <a class="save_button button" download="table.json">Сохранить</a>
-    </div>
-    <div class="table_wrapper">
+
+<div class="load_save_menu">
+    <span class="button load_button">Загрузить <input type="file" class="file_hidden"/></span>
+    <a class="save_button button" download="table.json">Сохранить</a>
+</div>
+<div class="table_wrapper">
+    <div class="thx"></div>
+    <div class="thy"></div>
+
+    <div class="table_view_port">
+
         <table class="main_table">
             <tr>
                 <td>
@@ -25,5 +31,6 @@
         </table>
     </div>
 </div>
+
 </body>
 </html>

@@ -27,7 +27,7 @@ var App = {
     ready: function () {
         App.$cellTempl = $('.table_cell');
         App.$table = $('.main_table');
-        App.drawTable(50, 300);
+
 
         $('body').on('keydown', App.onKeyDown);
 
@@ -49,6 +49,59 @@ var App = {
             };
             reader.readAsBinaryString($load.el[0].files[0]);
         });
+
+        App.$scrollViewPort = $('.table_view_port').scroll($.debounce(App.onScroll, 20, App));
+        //App.scroll_deaf = false;
+
+
+        App.$thx = $('.thx');
+        App.$thy = $('.thy');
+
+
+        App.drawTable(50, 300);
+    },
+
+    cellWidth: 101,
+    cellHeight: 21,
+
+    resetScroll: function () {
+        App.onScroll(0, 0);
+    },
+
+    onScroll: function (left, top) {
+        //if (!App.scroll_deaf) {
+
+        App.scrollX = Math.ceil(left / App.cellWidth);
+        App.scrollY = Math.ceil(top / App.cellHeight);
+
+        var el = App.$scrollViewPort.el[0];
+        //App.scroll_deaf = true;
+        el.scrollLeft = App.scrollX * App.cellWidth;
+        el.scrollTop = App.scrollY * App.cellHeight;
+
+        App.renderTH();
+        /*} else {
+         setTimeout(function(){
+         App.scroll_deaf = false;
+         },20);
+         }*/
+
+    },
+
+    renderTH: function () {
+        App.$thx.empty();
+        App.$thy.empty();
+        var width = App.$scrollViewPort.width() / App.cellWidth;
+        var height = App.$scrollViewPort.height() / App.cellHeight;
+
+
+        for (var i = 0; i < width; i++) {
+            App.$thx.append($.make('div').html(Cell.toLetters(App.scrollX + i + 1)));
+        }
+
+        for (var i = 0; i < height; i++) {
+            App.$thy.append($.make('div').html(App.scrollY + i + 1));
+        }
     },
 
     loadTable: function (data) {
@@ -57,7 +110,9 @@ var App = {
             var formula = data[cell.name] || '';
             cell.formula = formula;
             cell.update();
+
         }
+        App.resetScroll();
     },
     serialize: function () {
         var data = {};
@@ -109,6 +164,8 @@ var App = {
             }
             this.$table.append($tr);
         }
+
+        App.resetScroll();
     },
 
     onKeyDown: function (e) {
