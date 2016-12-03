@@ -27,43 +27,70 @@ var App = {
     ready: function () {
         App.$cellTempl = $('.table_cell');
         App.$table = $('.main_table');
-        App.drawTable(10, 10);
+        App.drawTable(50, 300);
 
         $('body').on('keydown', App.onKeyDown);
 
         App.$table.on('click', App.onTableClick);
         App.$table.on('mousedown', App.onTableMouseDown);
         App.$table.on('dblclick', App.startRecordingFormula);
+
+
+        var $save = $('.save_button').on('click', ()=> {
+            var data = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(App.serialize()));
+            $save.attr('href', data);
+        });
+
+        var $load = $('.file_hidden').on('change', ()=> {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var data = JSON.parse(e.target.result);
+                App.loadTable(data);
+            };
+            reader.readAsBinaryString($load.el[0].files[0]);
+        });
     },
-    /**
-     *
-     * @param e - event object
-     */
-    startRecordingFormula: function (e) {
-        if (e.target.classList.contains('table_cell')) {
 
-            var $target = $(e.target);
-            $('.table_cell.focused').removeClass('focused');
-
-            var pos = App.getCellPosition($target);
-
-            var cell = App.getCellByPosition(pos);
-            var f = cell.formula;
-            console.log(f);
-            if (f) {
-                $target.html(f);
-            }
-
-
-            $target
-                .attr('contenteditable', 'true')
-                .addClass('editable')
-                .focus();
-
-
-            App.recordingCell = cell;
-            App.recordingFormula = true;
+    loadTable: function (data) {
+        for (var name in this.cache) {
+            var cell = this.cache[name];
+            var formula = data[cell.name] || '';
+            cell.formula = formula;
+            cell.update();
         }
+    },
+    serialize: function () {
+        var data = {};
+        for (var name in this.cache) {
+            var formula = this.cache[name].formula;
+            if (formula != '') {
+                data[name] = formula;
+            }
+        }
+        return data;
+    },
+
+    startRecordingFormula: function () {
+        var $target = $('.table_cell.focused').removeClass('focused');
+
+
+        var pos = App.getCellPosition($target);
+
+        var cell = App.getCellByPosition(pos);
+        var f = cell.formula;
+        if (f) {
+            $target.html(f);
+        }
+
+
+        $target
+            .attr('contenteditable', 'true')
+            .addClass('editable')
+            .focus();
+
+
+        App.recordingCell = cell;
+        App.recordingFormula = true;
     },
     drawTable: function (width, height) {
         this.$table.empty();

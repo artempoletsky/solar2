@@ -57,8 +57,10 @@ Cell.prototype = {
         var self = this;
         Cell.variableExp.lastIndex = 0;
 
-        if (!formula)
-            return 0;
+        if (formula === '') {
+            return '';
+        }
+
 
         formula = formula.replace(Cell.variableExp, function (cellName) {
             var cell = App.cache[cellName];
@@ -69,7 +71,7 @@ Cell.prototype = {
                 cell.reverseDeps[self.name] = true;
             }
 
-            return cell.value;
+            return cell.value || 0;
         });
 
 
