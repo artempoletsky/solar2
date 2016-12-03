@@ -115,27 +115,25 @@ var App = {
         if (App.recordingFormula && e.keyCode == 13) {
             e.preventDefault();
 
-            var pos = App.getCellPosition($('.editable'));
-            pos.y++;
+            var pos = App.recordingCell.position;
             App.stopRecordingFormula();
-            App.setFocus(pos);
+            App.setFocus({
+                x: pos.x,
+                y: pos.y + 1
+            });
         }
     },
     stopRecordingFormula: function () {
-        var $editable = $('.editable')
+        var cell = App.recordingCell
+        var $cell = cell.$el
             .removeAttr('contenteditable')
             .removeClass('editable');
-        var formula = $editable.text();
 
-        var pos = App.getCellPosition($editable);
-        var cell = App.cache[Cell.positionToName(pos)];
-
+        var formula = $cell.text();
 
         $('.formula_focused').removeClass('formula_focused');
 
-
         cell.setFormula(formula);
-
 
         Selection.clear();
         App.recordingFormula = false;
