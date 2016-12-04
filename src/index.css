@@ -1,6 +1,9 @@
 .table_cell {
-    min-height: 20px;
+    height: 20px;
     cursor: default;
+    width: 100px;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .main_table {

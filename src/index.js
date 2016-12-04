@@ -50,6 +50,10 @@ var App = {
             reader.readAsBinaryString($load.el[0].files[0]);
         });
 
+        $(window).on('resize', function () {
+            App.renderTH();
+        });
+
         App.$scrollViewPort = $('.table_view_port').scroll($.debounce(App.onScroll, 20, App));
         //App.scroll_deaf = false;
 
@@ -127,6 +131,9 @@ var App = {
 
     startRecordingFormula: function () {
         var $target = $('.table_cell.focused').removeClass('focused');
+        if (!$target.el[0]) {
+            return;
+        }
 
 
         var pos = App.getCellPosition($target);
@@ -197,7 +204,7 @@ var App = {
     },
     setFocus: function (position) {
         var $cell;
-        if (position.x) {
+        if (position.x !== undefined) {
             $cell = this.getCellByPosition(position).$el;
         } else {
             $cell = $(position);
