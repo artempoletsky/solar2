@@ -109,19 +109,17 @@ var App = {
     },
 
     loadTable: function (data) {
-        for (var name in this.cache) {
-            var cell = this.cache[name];
+        for (var name in Cell.cache) {
+            var cell = Cell.cache[name];
             var formula = data[cell.name] || '';
-            cell.formula = formula;
-            cell.update();
-
+            cell.setFormula(formula);
         }
         App.resetScroll();
     },
     serialize: function () {
         var data = {};
-        for (var name in this.cache) {
-            var formula = this.cache[name].formula;
+        for (var name in Cell.cache) {
+            var formula = Cell.cache[name].formula;
             if (formula != '') {
                 data[name] = formula;
             }
@@ -156,7 +154,7 @@ var App = {
     },
     drawTable: function (width, height) {
         this.$table.empty();
-        App.cache = {};
+        Cell.cache = {};
         for (var i = 0; i < height; i++) {
             var $tr = $.make('tr');
             for (var j = 0; j < width; j++) {
@@ -166,7 +164,6 @@ var App = {
                     x: j,
                     y: i
                 });
-                App.cache[cell.name] = cell;
                 $tr.append($td.append(cell.$el));
             }
             this.$table.append($tr);
@@ -188,7 +185,7 @@ var App = {
         }
     },
     stopRecordingFormula: function () {
-        var cell = App.recordingCell
+        var cell = App.recordingCell;
         var $cell = cell.$el
             .removeAttr('contenteditable')
             .removeClass('editable');
@@ -213,17 +210,11 @@ var App = {
         $cell.switchClassTo('focused');
     },
     getCellByPosition: function (position) {
-        return this.cache[Cell.positionToName(position)]
+        return Cell.cache[Cell.positionToName(position)]
     },
 
 
-    updateCells: function (reverseDeps) {
-        for (var name in reverseDeps) {
-            var cell = App.cache[name];
-            cell.update();
-            App.updateCells(cell.reverseDeps);
-        }
-    },
+
 
     getCellPosition: function ($cell) {
         var $parent = $cell.parent();

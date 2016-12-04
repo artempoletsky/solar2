@@ -1,16 +1,21 @@
-var Cell = function ($el, position, formula) {
+var Cell = function ($el, position) {
     this.$el = $el;
 
-    this.name = Cell.positionToName(position);
+    if (typeof position == 'string') {
+        this.position = Cell.nameToPosition(position);
+        this.name = position;
+    } else {
+        this.name = Cell.positionToName(position);
+        this.position = position;
+    }
+
+
+    Cell.cache[this.name] = this;
     this.deps = {};
     this.value = 0;
     this.reverseDeps = {};
     this.formula = '';
-    this.position = position;
 
-    if (formula) {
-        this.setFormula(formula);
-    }
     return this;
 };
 
@@ -21,7 +26,7 @@ Cell.positionToName = function (position) {
 Cell.nameToPosition = function (name) {
     name = name.toUpperCase();
     Cell.variableExp.lastIndex = 0;
-    var res = App.variableExp.exec(name);
+    var res = Cell.variableExp.exec(name);
     return {
         x: Cell.fromLetters(res[1]) - 1,
         y: res[2] - 1
@@ -47,6 +52,44 @@ Cell.fromLetters = function (str) {
     return out;
 };
 
+Cell.updateCells = function (startCell) {
+
+    var error = false;
+    var temp = 0;
+    var finish = false;
+    var recur = function (parentCell) {
+
+        var reverseDeps = parentCell.reverseDeps;
+        for (var name in reverseDeps) {
+            var cell = Cell.cache[name];
+
+            if (cell == startCell) {
+                error = true;
+            }
+
+            if (error) {
+                if (!cell.loopError && temp++ < 10) {
+                    //console.log(cell.name);
+                    cell.loopError = true;
+                    cell.$el.html('loop_error');
+                    recur(cell);
+                }
+                continue;
+            }
+
+            cell.loopError = false;
+
+            cell.update();
+            recur(cell);
+        }
+    };
+
+    recur(startCell);
+
+};
+
+Cell.cache = {};
+
 Cell.prototype = {
     update: function () {
         var res = this.compileFormula(this.formula);
@@ -63,8 +106,11 @@ Cell.prototype = {
 
 
         formula = formula.replace(Cell.variableExp, function (cellName) {
-            var cell = App.cache[cellName];
+            var cell = Cell.cache[cellName];
 
+            if (cell.loopError) {
+                self.loopError = true;
+            }
 
             if (deps) {
                 self.deps[cellName] = true;
@@ -74,6 +120,9 @@ Cell.prototype = {
             return cell.value || 0;
         });
 
+        if (self.loopError) {
+            return 'loop error';
+        }
 
         formula = $.trim(formula, '=');
 
@@ -90,9 +139,12 @@ Cell.prototype = {
 
     setFormula: function (formula) {
 
-        for (var dep in this.deps) {
-            delete App.cache[dep].reverseDeps[this.name];
+        var deps = this.deps;
+
+        for (var dep in deps) {
+            delete Cell.cache[dep].reverseDeps[this.name];
         }
+        this.loopError = false;
         this.formula = formula;
 
         var result = this.compileFormula(formula, true);
@@ -100,7 +152,7 @@ Cell.prototype = {
         this.value = result;
         this.$el.html(result);
 
-        App.updateCells(this.reverseDeps);
+        Cell.updateCells(this);
 
     },
 };
