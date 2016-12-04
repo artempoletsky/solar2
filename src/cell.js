@@ -71,7 +71,7 @@ Cell.updateCells = function (startCell) {
                 if (!cell.loopError && temp++ < 10) {
                     //console.log(cell.name);
                     cell.loopError = true;
-                    cell.$el.html('loop_error');
+                    cell.$el.html(Cell.LOOP_ERROR_MSG);
                     recur(cell);
                 }
                 continue;
@@ -89,6 +89,8 @@ Cell.updateCells = function (startCell) {
 };
 
 Cell.cache = {};
+
+Cell.LOOP_ERROR_MSG = 'loop error';
 
 Cell.prototype = {
     update: function () {
@@ -121,7 +123,7 @@ Cell.prototype = {
         });
 
         if (self.loopError) {
-            return 'loop error';
+            return Cell.LOOP_ERROR_MSG;
         }
 
         formula = $.trim(formula, '=');
