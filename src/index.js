@@ -54,8 +54,7 @@ var App = {
             App.renderTH();
         });
 
-        App.$scrollViewPort = $('.table_view_port').scroll($.debounce(App.onScroll, 20, App));
-        //App.scroll_deaf = false;
+        App.$scrollViewPort = $('.table_view_port').scroll($.debounce(App.onScroll, 150, App));
 
 
         App.$thx = $('.thx');
@@ -73,23 +72,17 @@ var App = {
     },
 
     onScroll: function (left, top) {
-        //if (!App.scroll_deaf) {
+        console.log(left, top);
 
         App.scrollX = Math.ceil(left / App.cellWidth);
         App.scrollY = Math.ceil(top / App.cellHeight);
 
         var el = App.$scrollViewPort.el[0];
-        //App.scroll_deaf = true;
+
         el.scrollLeft = App.scrollX * App.cellWidth;
         el.scrollTop = App.scrollY * App.cellHeight;
 
         App.renderTH();
-        /*} else {
-         setTimeout(function(){
-         App.scroll_deaf = false;
-         },20);
-         }*/
-
     },
 
     renderTH: function () {
