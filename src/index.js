@@ -37,7 +37,13 @@ var App = {
 
 
         var $save = $('.save_button').on('click', ()=> {
-            var data = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(App.serialize()));
+            var json = JSON.stringify(App.serialize());
+            //IE 10
+            if (navigator.msSaveBlob) {
+                navigator.msSaveBlob(new Blob([json]), 'table.json');
+                return;
+            }
+            var data = 'data:application/json;charset=utf-8,' + encodeURIComponent(json);
             $save.attr('href', data);
         });
 
@@ -72,7 +78,6 @@ var App = {
     },
 
     onScroll: function (left, top) {
-        console.log(left, top);
 
         App.scrollX = Math.ceil(left / App.cellWidth);
         App.scrollY = Math.ceil(top / App.cellHeight);
@@ -205,8 +210,6 @@ var App = {
     getCellByPosition: function (position) {
         return Cell.cache[Cell.positionToName(position)]
     },
-
-
 
 
     getCellPosition: function ($cell) {
